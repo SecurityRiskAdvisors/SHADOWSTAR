@@ -1,0 +1,14 @@
+.idea/
+*.pyc
+*.swp
+databases/
+env/
+.bash_history
+.cache/
+network_info.tsv
+venv/
+.vscode/
+*.out/
+__pycache__/
+deploy.json
+shadowstar_webapp/index.html

@@ -1,0 +1,7 @@
+aws_cdk.core>=1.85.0,<2.0
+aws_cdk.aws_athena>=1.85.0,<2.0
+aws_cdk.aws_ec2>=1.85.0,<2.0
+aws_cdk.aws_ecs>=1.85.0,<2.0
+aws_cdk.aws_ecs_patterns>=1.85.0,<2.0
+aws_cdk.aws_ecr_assets>=1.85.0,<2.0
+aws_cdk.aws_s3_deployment>=1.85.0,<2.0

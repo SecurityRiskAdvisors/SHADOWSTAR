@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find CIDR prefixes of companies</title>
+    <link rel="stylesheet" href="//stackpath.bootstrapcdn.com/bootswatch/4.5.0/lumen/bootstrap.min.css">
+    <link rel="stylesheet" href="//use.fontawesome.com/releases/v5.5.0/css/all.css">
+    <link rel="stylesheet" href="//cdn.datatables.net/1.10.21/css/dataTables.bootstrap4.min.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.4/xlsx.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+    <script src="//cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+    <script src="//cdn.datatables.net/1.10.21/js/dataTables.bootstrap4.min.js"></script>
+    <style>
+        .searchbar {
+            margin-bottom: auto;
+            margin-top: auto;
+            height: 60px;
+            border: 2px solid #e9ecef;
+            border-radius: 30px;
+            padding: 10px;
+            width: 100%;
+        }
+        .search_input {
+            border: 0;
+            outline: 0;
+            background: none;
+            width: 100%;
+            caret-color: transparent;
+            line-height: 40px;
+            padding: 0 10px;
+            caret-color: #2780E3;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        table {
+            table-layout:fixed;
+        }
+        table td {
+            word-wrap: break-word;
+            max-width: 400px;
+        }
+        #example td {
+            white-space:inherit;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <a class="navbar-brand" href="#">
+            SHADOWSTAR
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarColor01">
+            <ul class="navbar-nav mr-auto"></ul>
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-toggle="modal" data-target="#aboutModal">
+                        <i class="fas fa-info-circle"></i>
+                        About
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="jumbotron">
+            <h1>SHADOWSTAR: Enumerate CIDR ranges</h1>
+            <p class="lead">
+                SHADOWSTAR performs scraping, cleaning, and compilation of
+                public Internet data to give you an interface that allows you to
+                quickly discover CIDR prefixes of a target organization.
+            </p>
+            <hr/>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="checkbox" id="allCheckbox" value="%" checked>
+            <label class="form-check-label" for="allCheckbox">All</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input source-checkbox" type="checkbox" id="arinCheckbox" value="arin" disabled>
+            <label class="form-check-label" for="arinCheckbox">ARIN</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input source-checkbox" type="checkbox" id="ripeCheckbox" value="ripe" disabled>
+            <label class="form-check-label" for="ripeCheckbox">RIPE-NCC</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input source-checkbox" type="checkbox" id="apnicCheckbox" value="apnic" disabled>
+            <label class="form-check-label" for="apnicCheckbox">APNIC</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input source-checkbox" type="checkbox" id="lacnicCheckbox" value="lacnic" disabled>
+            <label class="form-check-label" for="lacnicCheckbox">LACNIC</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input source-checkbox" type="checkbox" id="afrinicCheckbox" value="afrinic" disabled>
+            <label class="form-check-label" for="afrinicCheckbox">AfriNIC</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input source-checkbox" type="checkbox" id="level3Checkbox" value="level3" disabled>
+            <label class="form-check-label" for="level3Checkbox">LEVEL3</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input source-checkbox" type="checkbox" id="nttCheckbox" value="nttcom" disabled>
+            <label class="form-check-label" for="nttCheckbox">NTTCOM</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input source-checkbox" type="checkbox" id="radbCheckbox" value="radb" disabled>
+            <label class="form-check-label" for="radbCheckbox">RADB</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input source-checkbox" type="checkbox" id="tcCheckbox" value="tc" disabled>
+            <label class="form-check-label" for="tcCheckbox">TC</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input source-checkbox" type="checkbox" id="reachCheckbox" value="reach" disabled>
+            <label class="form-check-label" for="reachCheckbox">REACH</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input source-checkbox" type="checkbox" id="wcgdbCheckbox" value="wcgdb" disabled>
+            <label class="form-check-label" for="wcgdbCheckbox">WCGDB</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input source-checkbox" type="checkbox" id="jpirrCheckbox" value="jpirr" disabled>
+            <label class="form-check-label" for="jpirrCheckbox">JPIRR</label>
+        </div>
+        <hr/>
+        <div class="d-flex justify-content-center">
+            <div class="searchbar">
+                <input autocomplete="false" class="search_input" type="text" id="search_input" placeholder="Search by keyword (wildcard is %)" />
+            </div>
+            <button onclick="queryAPI()" style="border-radius: 30px;" class="btn btn-primary">
+                <i class="fas fa-search"></i>
+            </button>
+            <button onclick="forceDownload()" style="border-radius: 30px;" class="btn btn-secondary">
+                <i class="fas fa-save"></i>
+            </button>
+            <div class="form-check form-check-inline" style="margin-left: 15px;">
+                <input class="form-check-input" type="checkbox" id="dedupCheckbox" value="option13" checked>
+                <label class="form-check-label" for="dedupCheckbox">CIDR Reduce upon Save</label>
+            </div>
+        </div>
+        <br/>
+        <div class="progress">
+            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+        <hr/>
+        <table id="example" class="table table-hover wrap">
+            <thead>
+                <tr>
+                    <th scope="col">inetnum</th>
+                    <th scope="col">netname</th>
+                    <th scope="col">description</th>
+                    <th scope="col">country</th>
+                    <th scope="col">maintained_by</th>
+                    <th scope="col">created</th>
+                    <th scope="col">last_modified</th>
+                    <th scope="col">source</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <div class="modal fade" id="aboutModal" tabindex="-1" role="dialog" aria-labelledby="aboutModalDialog" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">About SHADOWSTAR</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>
+                        <strong>System version</strong>
+                        <pre id="system_version"></pre>
+                    </p>
+                    <p>
+                        <strong>Number of network blocks indexed:</strong>
+                        <pre id="num_network_blocks"></pre>
+                    </p>
+                    <p>
+                        <strong>Date of last database update:</strong>
+                        <pre id="last_update"></pre>
+                        <button onclick="dbUpdate()" class="btn btn-primary">
+                            Force DB Update <i class="fas fa-sync"></i>
+                        </button>
+                    </p>
+                    <hr/>
+                    <p>
+                        SHADOWSTAR was created by <a
+                        href="https://github.com/cramppet">Peter Crampton
+                        (@cramppet)</a> for Security Risk Advisors. The tool performs collection of RIR and
+                        IRR data and provides a search interface to discover
+                        CIDR prefixes via keyword search. For bug reports or
+                        other problems report them to the project's 
+                        <a href="https://github.com/SecurityRiskAdvisors/SHADOWSTAR">GitHub page</a>
+                        Thanks.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    const API_BASE = '%API_BASE%';
+    let table = null;
+    let rawCSV = "";
+    let rows = [];
+    let metadata = {'system_version': null, 'num_network_blocks': null, 'last_update': null};
+    let sources = new Set(['%']);
+
+    // Collect metadata from endpoint after page load
+    setTimeout(async () => {
+        const url = `${API_BASE}metadata`;
+        const res = await fetch(url);
+        if (res.status === 200) {
+            const body = JSON.parse(await res.text());
+            metadata['system_version'] = body['system_version'];
+            metadata['num_network_blocks'] = body['num_network_blocks'];
+            metadata['last_update'] = body['last_update'];
+        }
+        $('#system_version').text(metadata['system_version']);
+        $('#num_network_blocks').text(metadata['num_network_blocks']);
+        $('#last_update').text(metadata['last_update']);
+    }, 30000);
+
+    function setProgress(percent) {
+        $('.progress-bar').attr('aria-valuenow', percent);
+        $('.progress-bar').attr('style', `width:${percent}%`);
+    }
+
+    function csv2json(data) {
+        var wb = XLSX.read(data, {type:"binary"});
+        return XLSX.utils.sheet_to_json(wb.Sheets.Sheet1, {header:1, raw:true});
+    }
+
+    async function dbUpdate() {
+        const url = `${API_BASE}refresh-db`
+        const res = await fetch(url, {
+            method: 'POST', 
+            mode: 'cors',
+            headers: {'Content-Type': 'application/json'},
+            body: ''
+        });
+        if (res.status === 400) {
+            alert('Update job already in progress');
+        } else if (res.status === 200) {
+            alert('Update job submitted successfully. Wait about 90 minutes');
+        } else {
+            alert('Unknown error encountered');
+        }
+    }
+
+    async function queryAPI() {
+        setProgress("10");
+
+        let progress = 0;
+        let searchTerm = $('#search_input').val();
+        let url = `${API_BASE}query`;
+        let execution_id = '';
+        let body = {
+            'keyword': searchTerm,
+            'sources': Array.from(sources.values())
+        };
+
+        let res = await fetch(url, {
+            method: 'POST', 
+            mode: 'cors',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(body)
+        });
+
+        progress += 10;
+        setProgress(String(progress));
+
+        if (res.status === 200) {
+            let body = await res.text();
+            execution_id = JSON.parse(body)['execution_id'];
+            progress += 10;
+            setProgress(String(progress));
+        } else {
+            alert('Query could not be executed, check your syntax and try again');
+            setProgress("100");
+            return;
+        }
+
+        let counter = setInterval(async () => {
+            let url = `${API_BASE}retrieve/${execution_id}`
+            let res1 = await fetch(url);
+
+            if (res1.status === 200) {
+                clearInterval(counter);
+                setProgress("75");
+                let body = await res1.text();
+                let results_url = JSON.parse(body)['results'];
+                let res2 = await fetch(results_url);
+                let csv = await res2.text();
+                rawCSV = csv;
+                rows = csv2json(rawCSV);
+                updateTable(rows);
+                setProgress("100");
+            }
+        }, 7500);
+    }
+
+    function forceDownload() {
+        const dedup = $('#dedupCheckbox').is(':checked');
+        let val = rawCSV;
+
+        if (dedup) {
+            // We lose headers when we perform CIDR reduction
+            const reduced = cidr_reduce(rows);
+            val = "inetnum,netname,description,country,maintained_by,created,last_modified,source\n";
+            for (let i = 0; i < reduced.length; i++) {
+                val += (reduced[i].join(',') + "\n")
+            }
+        } 
+
+        let e = document.createEvent('MouseEvents');
+        let a = document.createElement('a');
+        const blob = new Blob([val], {type: 'text/csv'});
+
+        a.download = 'results.csv';
+        a.href = window.URL.createObjectURL(blob);
+        a.dataset.downloadurl =  ['text/csv', a.download, a.href].join(':');
+        e.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+        a.dispatchEvent(e);
+    }
+
+    function updateTable(newDataArray) {
+        table.clear();
+        table.rows.add(newDataArray);
+        table.draw();
+    }
+
+    // We assume this is a CSV row and we take the first column, inetnum
+    function ipv4_to_int(row) {
+        const ipv4 = row[0];
+        const parts = ipv4.split('.');
+        let ret = [0];
+        for (let i = 0; i < 4; i++) {
+            if (parts[i].indexOf('/') !== -1)
+                parts[i] = parts[i].split('/')[0];
+            ret[0] += (Math.abs(Number(parts[i])) * Math.pow(2,24-(8*i))); 
+        }
+        ret = ret.concat(row);
+        return ret;
+    }
+
+    function ipv6_to_int(row) {
+        let ipv6 = row[0].split('/')[0];
+        let tmp = ipv6.split(':');
+        let ret = [0];
+        if (tmp.length !== 8) {
+            let replacement = [];
+            let end_colon = true;
+            for (let i = 0; i < 8-tmp.length+1; i++) {
+                replacement.push('0000');
+            }
+            replacement = replacement.join(':');
+            if (ipv6.endsWith('::')) {
+                end_colon = false;
+            }
+            ipv6 = ipv6.replace('::', `:${replacement}${end_colon ? ":" : ""}`);
+        }
+        const parts = ipv6.split(':')
+        for (let i = 0; i < parts.length; i++) {
+            ret[0] += (Number(`0x${parts[i]}`) * Math.pow(2,112-(16*i)));
+        }
+        ret = ret.concat(row);
+        return ret;
+    }
+
+    function ip_to_int(row) {
+        if (/\d{1,3}\.\d{1,3}\.\d{1,3}.\d{1,3}\//.exec(row[0])) {
+            return ipv4_to_int(row);
+        } else {
+            return ipv6_to_int(row);
+        }
+    }
+
+    function mask_to_span(start, mask) {
+        if (start > Math.pow(2,32)) {
+            return Math.pow(2, 128-mask);
+        } else if (mask > 32) {
+            return Math.pow(2, 128-mask);
+        }
+        return Math.pow(2, 32-mask);
+    }
+
+    function cidr_reduce(rows) {
+        const seen_values = new Set();
+        const cidr_blocks = [];
+        const ret = [];
+        const masks = {};
+
+        for (let i = 1; i < rows.length; i++) {
+            if (rows[i] === undefined || rows[i][0] === undefined || rows[i][0].match === undefined) {
+                continue;
+            }
+            // Cheap IPv4 regex
+            else if (/\d{1,3}\.\d{1,3}\.\d{1,3}.\d{1,3}\//.exec(rows[i][0])) {
+                if (!seen_values.has(rows[i][0])) {
+                    seen_values.add(rows[i][0]);
+                    cidr_blocks.push(rows[i]);
+                }
+            // Presumed IPv6
+            } else if ((rows[i][0].match(/:/g) || []).length > 2) {
+                if (!seen_values.has(rows[i][0])) {
+                    seen_values.add(rows[i][0]);
+                    cidr_blocks.push(rows[i]);
+                }
+            } else {
+                if (!seen_values.has(rows[i][0])) {
+                    seen_values.add(rows[i][0]);
+                    ret.push(rows[i]);
+                }
+            }
+        }
+
+        const cidr_int_blocks = cidr_blocks.map((e) => ip_to_int(e)).sort((a,b) => a[0]-b[0]);
+        for (let i = 0; i < cidr_blocks.length; i++) {
+            if (cidr_blocks[i][0].indexOf('/') !== -1) {
+                const mask = Number(/\d+/.exec(cidr_blocks[i][0].split('/')[1])[0]);
+                const block = ip_to_int(cidr_blocks[i]);
+                if (!(block[0] in masks) || masks[block[0]] > mask)
+                    masks[block[0]] = mask;
+            }
+        }
+        
+        let idx = 0;
+        let start_idx = 0;
+
+        while (isNaN(cidr_int_blocks[start_idx][0])) {
+            ret.push(cidr_int_blocks[start_idx].splice(1));
+            start_idx += 1;
+        }
+
+        let start = cidr_int_blocks[start_idx][0];
+        let span = mask_to_span(start, masks[start]);
+
+        while (idx < cidr_int_blocks.length-1) {
+            idx += 1;
+            if (start + span <= cidr_int_blocks[idx][0]) {
+                ret.push(cidr_int_blocks[start_idx].splice(1));
+                if (idx < cidr_int_blocks.length) {
+                    start_idx = idx;
+                    start = cidr_int_blocks[idx][0];
+                    span = mask_to_span(start, masks[start]);
+                }
+            }
+        }
+
+        ret.push(cidr_int_blocks[start_idx].splice(1));
+        return ret;
+    }
+
+    $(document).ready(function() {
+        table = $('#example').DataTable({
+            'searching': false,
+            'columnDefs': [
+                { "title": "inetnum" },
+                { "title": "netname" },
+                { "title": "description" },
+                { "title": "country" },
+                { "title": "maintained_by" },
+                { "title": "created" },
+                { "title": "last_modified" },
+                { "title": "source" },
+            ]
+        });
+
+        $.fn.dataTable.ext.errMode = 'none';
+        $('#example').on('error.dt', function (e, settings, techNote, message) {
+            console.log('An error has been reported by DataTables: ', message);
+        });
+    });
+
+    $(document).keypress((e) => {
+        if (e.keyCode === 13) {
+            queryAPI();
+        }
+    });
+
+    $('#allCheckbox').click(() => {
+        const checked = $('#allCheckbox').is(':checked');
+        sources.clear();
+        if (checked) {
+            sources.add('%');
+            $("input.source-checkbox").prop("checked", false);
+        }
+        $("input.source-checkbox").attr("disabled", checked);
+    });
+
+    $('input.source-checkbox').click((e) => {
+        const checked = $(`#${e.target.id}`).is(':checked');
+        if (checked)
+            sources.add(e.target.defaultValue);
+        else
+            sources.delete(e.target.defaultValue);
+    });
+</script>
+</html>
