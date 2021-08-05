@@ -439,6 +439,12 @@
 		let cidr_int_blocks = [];
 		for (let i = 0; i < cidr_blocks.length; i++) {
 			const t = ip_to_int(cidr_blocks[i]);
+			if (t.length < 8) {
+				continue;
+			}
+			if (t[1] === undefined) {
+				continue;
+			}
 			if (isNaN(t[0])) {
 				ret.push(t.splice(1));
 				continue;
@@ -470,7 +476,7 @@
         while (idx < cidr_int_blocks.length-1) {
             idx += 1;
             if (start + span <= cidr_int_blocks[idx][0]) {
-                ret.push(cidr_int_blocks[start_idx].splice(1));
+                ret.push(cidr_int_blocks[start_idx].slice(1));
                 if (idx < cidr_int_blocks.length) {
                     start_idx = idx;
                     start = cidr_int_blocks[start_idx][0];
@@ -484,7 +490,7 @@
             }
         }
 
-        ret.push(cidr_int_blocks[start_idx].splice(1));
+        ret.push(cidr_int_blocks[start_idx].slice(1));
         return ret;
     }
 
